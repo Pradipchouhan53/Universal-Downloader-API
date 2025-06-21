@@ -1,42 +1,35 @@
-export default {
-  async fetch(request) {
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    };
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
-    }
-    const { searchParams } = new URL(request.url);
-    const targetUrl = searchParams.get("url");
-    if (!targetUrl) {
-      return new Response(
-        JSON.stringify({ error: "Missing 'url' query parameter" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-    const megaFetchApiUrl = `https://megafetch.hideme.eu.org/?url=${encodeURIComponent(targetUrl)}`;
-    try {
-      const response = await fetch(megaFetchApiUrl, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36",
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`API responded with status: ${response.status}`);
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+module.exports = async (req, res) => {
+  const cors = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
+
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, cors);
+    return res.end();
+  }
+
+  const { url } = req.query;
+  if (!url) {
+    res.writeHead(400, { ...cors, "Content-Type": "application/json" });
+    return res.end(JSON.stringify({ error: "Missing 'url' query parameter" }));
+  }
+
+  try {
+    const response = await fetch(`https://megafetch.hideme.eu.org/?url=${encodeURIComponent(url)}`, {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
       }
-      const data = await response.json();
-      return new Response(JSON.stringify(data), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify({ error: "Error fetching from MegaFetch API", details: error.message }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-  },
+    });
+
+    const data = await response.json();
+    res.writeHead(200, { ...cors, "Content-Type": "application/json" });
+    return res.end(JSON.stringify(data));
+  } catch (err) {
+    res.writeHead(500, { ...cors, "Content-Type": "application/json" });
+    return res.end(JSON.stringify({ error: "Fetch error", message: err.message }));
+  }
 };

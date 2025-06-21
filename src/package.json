@@ -1,6 +1,7 @@
 {
-  "name": "ytdl-proxy",
+  "name": "ytdl-proxy-node",
   "version": "1.0.0",
-  "type": "module",
-  "dependencies": {}
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
 }
