@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "functions": {
+    "index.js": { "runtime": "edge" }
+  },
+  "routes": [
+    { "src": "/(.*)", "dest": "index.js" }
+  ]
+}
