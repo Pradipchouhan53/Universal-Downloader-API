@@ -1,4 +1,4 @@
-# ytdl-proxy
+# Universal-Downloader-API
 
 CORS-enabled YouTube info proxy using MegaFetch API. Deployable on Vercel or Cloudflare Workers.
 
